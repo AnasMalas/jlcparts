@@ -1,0 +1,14 @@
+{
+  "name": "jlcparts",
+  "private": true,
+  "type": "module",
+  "description": "Parametric search for the JLCPCB assembly parts library",
+  "scripts": {
+    "data": "node pipeline/build.mjs",
+    "data:offline": "node pipeline/build.mjs --offline",
+    "dev": "npm --prefix web run dev",
+    "build": "npm --prefix web run build",
+    "test": "node --test shared/ pipeline/ web/src/lib/"
+  },
+  "engines": { "node": ">=20" }
+}

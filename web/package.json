@@ -1,61 +1,23 @@
 {
-  "name": "jlcparts",
-  "version": "0.1.0",
+  "name": "jlcparts-web",
   "private": true,
-  "dependencies": {
-    "@discoveryjs/natural-compare": "^1.0.0",
-    "@fortawesome/fontawesome-svg-core": "^1.2.30",
-    "@fortawesome/free-brands-svg-icons": "^5.14.0",
-    "@fortawesome/free-regular-svg-icons": "^5.14.0",
-    "@fortawesome/free-solid-svg-icons": "^5.14.0",
-    "@fortawesome/react-fontawesome": "^0.1.11",
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.5.0",
-    "@testing-library/user-event": "^7.2.1",
-    "dexie": "^3.0.2",
-    "file-saver": "^2.0.5",
-    "immer": "^7.0.8",
-    "js-untar": "^2.0.0",
-    "pako": "^2.0.4",
-    "react": "^16.13.1",
-    "react-copy-to-clipboard": "^5.0.2",
-    "react-dom": "^16.13.1",
-    "react-lazy-load-image-component": "^1.5.0",
-    "react-router-dom": "^5.2.0",
-    "react-scripts": "^5.0.1",
-    "react-scroll": "^1.8.1",
-    "react-waypoint": "^9.0.3"
-  },
+  "version": "2.0.0",
+  "type": "module",
   "scripts": {
-    "start": "npm run watch:css && react-scripts start",
-    "build": "npm run build:css && react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "build:css": "postcss src/tailwind.css -o src/main.css",
-    "watch:css": "postcss src/tailwind.css -o src/main.css"
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
   },
-  "eslintConfig": {
-    "extends": "react-app"
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "homepage": ".",
   "devDependencies": {
-    "autoprefixer": "^9.8.6",
-    "postcss-cli": "^9.1.0",
-    "postcss-flexbugs-fixes": "^5.0.2",
-    "postcss-normalize": "^10.0.1",
-    "postcss-preset-env": "^7.7.1",
-    "tailwindcss": "^1.8.4"
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
   }
 }
