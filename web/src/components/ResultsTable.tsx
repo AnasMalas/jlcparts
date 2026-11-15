@@ -98,7 +98,13 @@ export function ResultsTable(props: {
             const lcsc = cat.lcsc[r];
             const fav = props.favs.has(lcsc);
             return (
-              <tr key={r} className={props.openRow === r ? 'open' : ''} onClick={() => props.onOpen(r)}>
+              <tr
+                key={r}
+                className={props.openRow === r ? 'open' : ''}
+                onClick={() => props.onOpen(r)}
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' && e.target === e.currentTarget) props.onOpen(r); }}
+              >
                 <td className="first">
                   <div className="partcell">
                     <button

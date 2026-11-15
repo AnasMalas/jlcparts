@@ -102,6 +102,9 @@ const CN_TOKENS = [
   ['铜合金', 'Copper Alloy'], ['磷青铜', 'Phosphor Bronze'], ['铍青铜', 'Beryllium Bronze'], ['铍铜', 'Beryllium Copper'],
   ['不锈钢', 'Stainless Steel'], ['铁氧体磁芯', 'Ferrite Core'], ['铁氧体', 'Ferrite'], ['象牙色', 'Ivory'], ['青色', 'Cyan'],
   ['聚丙烯膜', 'Polypropylene Film'], ['模压电感', 'Molded Inductor'], ['金属压粉', 'Metal Powder'], ['封闭式', 'Enclosed'],
+  ['玻纤增强', 'Glass-Fibre Reinforced '], ['卡检测功能', 'Card Detect'], ['双指向型', 'Bidirectional'],
+  ['槽型对接', 'Slot Mating'], ['针孔对接', 'Pin-Hole Mating'], ['刀片对接', 'Blade Mating'], ['钛铜', 'Titanium Copper'],
+  ['板端', 'Board Side'], ['不自复位', 'Non-Resetting'], ['误差校正', 'Error Correction'],
   ['无线', 'Wireless'], ['自动', 'Automatic'], ['保护', 'Protection'], ['接口', 'Interface'], ['兼容', 'Compatible'],
 ];
 /** Replace the handful of Chinese tokens that leak into otherwise-English values. */

@@ -72,6 +72,14 @@ function SetCard({ col, facet, filter, onChange }: CardProps) {
           </span>
         </div>
       )}
+      {q.trim() && visible.length > 1 && visible.length <= MAX_OPTS && (
+        <div className="fsearch">
+          <button
+            className="linkbtn"
+            onClick={() => onChange(col.id, { kind: 'set', sel: [...new Set([...sel, ...visible])].sort((a, b) => a - b), all: f?.all })}
+          >Select all {visible.length} shown</button>
+        </div>
+      )}
       <div className="opts" role="listbox" aria-multiselectable="true" aria-label={col.name}>
         {visible.slice(0, MAX_OPTS).map((i) => {
           const n = counts ? counts[i] : 0;
@@ -163,18 +171,17 @@ function NumCard({ col, facet, filter, onChange, valuesOpen, onToggleValues }: C
             inputMode="text" autoComplete="off" spellCheck={false}
           />
         </div>
-        <div className={`fhint${hintBad ? ' bad' : ''}`} title={hint}>{hint}</div>
-        {has && nf.max > nf.min && (
-          <>
-            <Hist facet={nf} min={f?.min} max={f?.max} />
-            <div className="hist-ax"><span>{formatNum(col, nf.min)}</span><span>{nf.log ? 'log scale' : ''}</span><span>{formatNum(col, nf.max)}</span></div>
-          </>
-        )}
-        <div style={{ marginTop: 5 }}>
-          <button className="linkbtn" onClick={() => onToggleValues(col.id)}>
-            {valuesOpen ? 'Hide value list' : vals.size ? `Pick values (${vals.size} picked)` : 'Pick exact values'}
+        <div className="frow">
+          <div className={`fhint${hintBad ? ' bad' : ''}`} title={hint}>{hint}</div>
+          <button className="linkbtn" onClick={() => onToggleValues(col.id)} title="Pick exact values from a list instead of a range">
+            {valuesOpen ? 'hide list' : vals.size ? `${vals.size} picked` : 'list'}
           </button>
         </div>
+        {has && nf.max > nf.min && !valuesOpen && (
+          <div title={`Where the ${fmtInt(nf.count)} available parts fall between ${formatNum(col, nf.min)} and ${formatNum(col, nf.max)}${nf.log ? ' (log scale)' : ''}`}>
+            <Hist facet={nf} min={f?.min} max={f?.max} />
+          </div>
+        )}
         {valuesOpen && nf?.values && (
           <div className="vals">
             {nf.values.slice(0, 600).map(([v, n]) => (

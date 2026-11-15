@@ -155,10 +155,14 @@ npm run dev
 
 The workflow in `.github/workflows/deploy.yml` rebuilds the database and
 publishes the site to GitHub Pages on every push to `main` and once a day.
-In a fork, two switches have to be flipped once:
+In a fork, three switches have to be flipped once:
 
-1. **Actions tab** → enable workflows (GitHub disables them in forks).
+1. **Settings → General → Default branch → `main`.** GitHub only runs
+   scheduled workflows from the default branch, and by default only lets the
+   default branch deploy to Pages.
 2. **Settings → Pages → Build and deployment → Source: GitHub Actions.**
+3. **Actions tab** → enable workflows, if GitHub shows the prompt (it disables
+   them in new forks).
 
 Then run "Build and deploy" from the Actions tab, or push to `main`.
 
