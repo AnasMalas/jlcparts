@@ -211,8 +211,9 @@ export function parseValue(text, unit) {
 export function inputHint(unit) {
   const u = UNITS[unit];
   if (!u) return 'number';
-  if (u.mode === 'si') return `e.g. 10m, 4k7, 100n (${u.sym})`;
+  if (u.mode === 'si') return 'e.g. 10m, 4k7, 100n';
   if (u.mode === 'time') return 'e.g. 10n, 5m, 2000h';
   if (u.mode === 'bytes') return 'e.g. 64k, 1M';
-  return u.sym ? `in ${u.sym}` : 'number';
+  if (u.mode === 'money') return 'in USD';
+  return u.sym ? `in ${u.sym}` : 'a number';
 }

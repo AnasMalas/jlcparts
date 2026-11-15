@@ -406,7 +406,7 @@ export function compileSheet(defs: Definition[], env: Env): CompiledSheet {
         for (const d of deps[i]) if (flags.est[d]) est = true;
         flags.est[i] = est ? 1 : 0;
         if (Number.isNaN(L[i])) {
-          let note = ctx.note;
+          let note = ctx.note as string | null;
           if (!note) for (const d of deps[i]) if (flags.notes[d]) { note = flags.notes[d]; break; }
           flags.notes[i] = note;
         }
@@ -423,7 +423,7 @@ export function compileSheet(defs: Definition[], env: Env): CompiledSheet {
         for (const i of g.ids) {
           const v = fns[i]!(ctx);
           const x = typeof v === 'number' ? v : NaN;
-          if (Number.isNaN(x)) { diverged = true; note = ctx.note ?? note; break; }
+          if (Number.isNaN(x)) { diverged = true; note = (ctx.note as string | null) ?? note; break; }
           if (!Number.isFinite(x) || Math.abs(x) > 1e12) { diverged = true; note = 'no stable solution (runs away)'; break; }
           const next = L[i] + relax * (x - L[i]);
           const d = Math.abs(next - L[i]) / Math.max(1, Math.abs(next));

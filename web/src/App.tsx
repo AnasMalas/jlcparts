@@ -71,7 +71,7 @@ export function App() {
             ref={searchRef}
             className="input"
             type="search"
-            placeholder="Search all parts by part number or LCSC code, or find a category…"
+            placeholder="Search part number, LCSC code or category…"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -90,7 +90,7 @@ export function App() {
         <button className="btn ghost icon" onClick={() => setTheme(nextTheme)} title={`Theme: ${theme} (click for ${nextTheme})`} aria-label="Change theme">
           <ThemeIcon />
         </button>
-        <button className="btn ghost" onClick={() => setAbout(true)}><Icon.info /> About &amp; credits</button>
+        <button className="btn ghost" onClick={() => setAbout(true)} title="About, credits and data sources"><Icon.info /> <span className="wide">About &amp; credits</span></button>
         <a className="btn ghost icon" href={REPO_URL} target="_blank" rel="noreferrer" title="Source on GitHub" aria-label="Source on GitHub"><Icon.github /></a>
       </div>
 
