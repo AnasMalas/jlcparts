@@ -347,6 +347,17 @@ async function main() {
   const parseLut = (i) => (parsed[i] ??= parseEntry(lut[i][1]));
   console.log(`Upstream: ${manifest.totalComponents} parts, ${manifest.categories.length} categories, ${lut.length} attribute values`);
 
+  // Photo file names collected separately (image-index/*.json), for parts the upstream data has none for.
+  const photoIndex = new Map();
+  try {
+    for (const name of await readdir(path.join(ROOT, 'image-index'))) {
+      if (!name.endsWith('.json')) continue;
+      const entries = JSON.parse(await readFile(path.join(ROOT, 'image-index', name), 'utf8'));
+      for (const [code, file] of Object.entries(entries)) if (file) photoIndex.set(parseInt(code.slice(1), 10), file);
+    }
+  } catch { /* no image index yet */ }
+  let photosUpstream = 0, photosIndexed = 0;
+
   // ---- 1. place every upstream category into the merged taxonomy ----------
   const tax = buildTaxonomy();
   const merged = new Map(); // id -> { id, group, name, sources: [], rows: [] }
@@ -415,13 +426,17 @@ async function main() {
             for (const k of [...attrs.keys()]) if (!view.has(k)) attrs.delete(k);
             for (const [k, v] of view) if (before.get(k) !== v) attrs.set(k, v);
           }
+          const lcscNum = parseInt(String(lcsc).replace(/^C/i, ''), 10);
+          let img = r[schema.img] ?? null;
+          if (img) photosUpstream++;
+          else if ((img = photoIndex.get(lcscNum) ?? null)) photosIndexed++;
           rows.push({
-            lcsc: parseInt(String(lcsc).replace(/^C/i, ''), 10),
+            lcsc: lcscNum,
             mfr: r[schema.mfr] ?? '',
             desc: r[schema.description] ?? '',
             ds: r[schema.datasheet] ?? '',
             price: simplifyPrice(r[schema.price]),
-            img: r[schema.img] ?? null,
+            img,
             url: r[schema.url] ?? null,
             stock: r[schema.stock] ?? 0,
             joints: r[schema.joints] ?? null,
@@ -524,6 +539,7 @@ async function main() {
       bytes: gz.length,
       basic: cls.filter((x) => x === 0).length,
       params: attrs.filter((a) => !a.rare).length,
+      photos: Object.keys(img).length,
       src: [...new Set(cat.sources.map((s) => `${s.cat} / ${s.sub}`))],
     });
     search.cats.push([cat.id, n]);
@@ -589,6 +605,7 @@ async function main() {
   console.log(
     `Built ${total} parts into ${files.length} categories (${groups.length} groups) from ${manifest.categories.length} upstream categories in ${((Date.now() - t0) / 1000).toFixed(1)}s`,
   );
+  console.log(`Photos: ${photosUpstream} from the upstream data, ${photosIndexed} from image-index/ (${(((photosUpstream + photosIndexed) / Math.max(1, total)) * 100).toFixed(1)}% of parts)`);
   const unused = tax.unused();
   if (unused.length && !ONLY) console.log(`NOTE: ${unused.length} taxonomy sources no longer exist upstream:\n   ${unused.join('\n   ')}`);
 }

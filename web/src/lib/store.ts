@@ -51,6 +51,8 @@ export function applyTheme(t: Theme) {
 export interface CatPrefs {
   /** column ids shown in the table, in order; undefined = defaults */
   cols?: string[];
+  /** column widths the user has dragged, by column id */
+  widths?: Record<string, number>;
   /** facet ids pinned open even though they are "rare" */
   moreFilters?: boolean;
 }

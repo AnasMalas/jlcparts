@@ -54,8 +54,13 @@ This is an unofficial community tool, not affiliated with JLCPCB or LCSC.
   when you open it (MOSFETs: 1.5 MB). The original downloads the whole database
   first.
 - **Shareable searches.** The whole state is in the URL.
-- Favourites, CSV export, column chooser, light / dark theme, keyboard `/` to
-  search.
+- **A table you can shape.** Open a part's datasheet straight from its row.
+  Show or hide columns one at a time (× in the header), all at once, or by
+  searching the column list. Drag a header's edge to resize it; double-click to
+  fit. Your layout is remembered per category.
+- **Part photos** in the table (toggle "Photos"), with a larger preview on
+  hover. Coverage depends on the photo index, see below.
+- Favourites, CSV export, light / dark theme, keyboard `/` to search.
 
 ## Formula columns
 
@@ -116,6 +121,25 @@ The site sends nothing anywhere in this flow and needs no API key. Imported
 records live in your browser until you contribute them (one download, one
 command, one pull request), after which every visitor has them.
 
+## Part photos
+
+The upstream database carries a photo for only about 1 % of parts, and LCSC's
+image file names cannot be derived from a part number. `image-index/` holds the
+file names for more parts; the photos themselves are always loaded from LCSC's
+image server, never copied.
+
+`tools/collect-images.mjs` fills the index by reading a part's public LCSC
+product page, one page at a time with a pause in between, starting with the
+most-stocked parts of a category:
+
+```bash
+npm run collect-images -- --category mosfets --top 500
+```
+
+It is deliberately slow and stops if LCSC signals it should. Covering the whole
+catalogue this way means several hundred thousand page reads, so do it a
+category at a time, and read [docs/DATA-POLICY.md](docs/DATA-POLICY.md) first.
+
 ## Datasheet data
 
 Values that only exist in datasheets (curves, thermal resistance) live in
@@ -150,6 +174,7 @@ datasheet-data/*.json ──────▶ normalise parameters    c/<category>
 - `tools/extract-datasheet.mjs` — reads a datasheet PDF with Claude and writes
   a `datasheet-data` record. `tools/import-records.mjs` turns a bundle of
   records (a job answer, or a download from the site) into files.
+  `tools/collect-images.mjs` builds the photo index.
 
 ## Running it yourself
 

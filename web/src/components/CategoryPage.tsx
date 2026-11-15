@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { datasheetUrl, loadCategory, type Category, type Column, type DataIndex, type IndexCat } from '../lib/data';
+import { datasheetUrl, imageUrl, loadCategory, type Category, type Column, type DataIndex, type IndexCat } from '../lib/data';
 import { applyParams, builtinColumns, computeColumns, formulaSetup } from '../lib/columns';
 import { loadDsData, type DsMap } from '../lib/dsdata';
 import { isActive, run, sortRows, type FilterState } from '../lib/engine';
@@ -7,7 +7,7 @@ import { cellText, describeFilter } from '../lib/format';
 import { prefsKey, sheetKey, useStored, type CatPrefs, type Sheet } from '../lib/store';
 import { hashFor, paramsFromState, stateFromParams, type Route, type ViewState } from '../lib/url';
 import { FacetPanel } from './FacetPanel';
-import { ResultsTable } from './ResultsTable';
+import { DESC_COL, ResultsTable } from './ResultsTable';
 import { DetailDrawer } from './DetailDrawer';
 import { FormulaEditor } from './FormulaEditor';
 import { ColumnsDialog } from './ColumnsDialog';
@@ -27,6 +27,7 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
   const [sheet, setSheet] = useStored<Sheet>(sheetKey(info.id), []);
   const [prefs, setPrefs] = useStored<CatPrefs>(prefsKey(info.id), {});
   const [favList, setFavList] = useStored<number[]>('favs', []);
+  const [photoPref, setPhotoPref] = useStored<boolean | null>('photos', null);
   const [state, setState] = useState<ViewState | null>(null);
   const [valuesOpen, setValuesOpen] = useState<Set<string>>(() => new Set());
   const [dialog, setDialog] = useState<'formula' | 'columns' | 'job' | null>(null);
@@ -109,7 +110,7 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
     return sortRows(cat, result.rows, allCols.find((c) => c.id === state.sort) ?? null, state.sort, state.desc);
   }, [cat, result, state?.sort, state?.desc, allCols]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const defaultCols = useMemo(() => [...builtins.filter((c) => c.id !== '$ds').map((c) => c.id), ...attrs.filter((c) => !c.rare).map((c) => c.id)], [attrs, builtins]);
+  const defaultCols = useMemo(() => [...builtins.filter((c) => c.id !== '$ds').map((c) => c.id), ...attrs.filter((c) => !c.rare).map((c) => c.id), DESC_COL], [attrs, builtins]);
   const shownIds = prefs.cols ?? defaultCols;
   const tableCols = useMemo(() => {
     const byId = new Map(allCols.map((c) => [c.id, c]));
@@ -126,6 +127,19 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
   const nRare = attrs.filter((c) => c.rare).length;
   const recipe = recipeFor(cat.id);
   const openRow = state.part !== null ? cat.rowOf.get(state.part) ?? null : null;
+  // Photos: on by default only where a fair share of the category has one, so the table is not mostly placeholders.
+  const nPhotos = Object.keys(cat.img).length;
+  const photos = photoPref ?? nPhotos >= 0.1 * cat.n;
+  const hideColumn = (id: string) => {
+    if (id.startsWith('$f:')) setSheet((defs) => defs.map((d) => (`$f:${d.id}` === id ? { ...d, show: false } : d)));
+    else setPrefs((p) => ({ ...p, cols: (p.cols ?? defaultCols).filter((x) => x !== id) }));
+  };
+  const resizeColumn = (id: string, w: number | null) =>
+    setPrefs((p) => {
+      const widths = { ...p.widths };
+      if (w === null) delete widths[id]; else widths[id] = w;
+      return { ...p, widths };
+    });
   const anyFilter = active.length > 0 || !!state.text || state.fav;
 
   const onSort = (id: string) => {
@@ -135,10 +149,10 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
   };
 
   const exportCsv = () => {
-    const head = ['LCSC', 'MFR Part', ...tableCols.map((c) => c.name), 'Description', 'Datasheet'];
+    const head = ['LCSC', 'MFR Part', ...tableCols.map((c) => c.name), 'Description', 'Datasheet', 'Photo'];
     const lines = [head.map(csvCell).join(',')];
     for (const r of sorted) {
-      const cells = [`C${cat.lcsc[r]}`, cat.mfr[r], ...tableCols.map((c) => cellText(c, r)), cat.desc[r], datasheetUrl(cat.ds[r]) ?? ''];
+      const cells = [`C${cat.lcsc[r]}`, cat.mfr[r], ...tableCols.map((c) => cellText(c, r)), cat.desc[r], datasheetUrl(cat.ds[r]) ?? '', cat.img[r] ? imageUrl(cat.img[r]) : ''];
       lines.push(cells.map(csvCell).join(','));
     }
     const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
@@ -183,6 +197,10 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
             <Icon.doc /> Datasheet job
           </button>
         )}
+        <button
+          className={`btn${photos ? ' on' : ''}`} onClick={() => setPhotoPref(!photos)}
+          title={`Show a photo in every row. ${nPhotos ? `${fmtInt(nPhotos)} of ${fmtInt(cat.n)} parts here have one in the catalogue data.` : 'The catalogue data has no photos for this category yet.'}`}
+        ><Icon.image /> Photos</button>
         <button className="btn" onClick={() => setDialog('columns')}><Icon.columns /> Columns</button>
         <button className="btn" onClick={exportCsv} title={`Download the ${fmtInt(sorted.length)} matching parts as CSV`}><Icon.download /> CSV</button>
       </div>
@@ -230,6 +248,8 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
       <section className="panel results">
         <ResultsTable
           cat={cat} rows={sorted} cols={tableCols}
+          showDesc={shownIds.includes(DESC_COL)} photos={photos}
+          widths={prefs.widths ?? {}} onResize={resizeColumn} onHide={hideColumn}
           sort={state.sort} desc={state.desc} onSort={onSort}
           openRow={openRow} onOpen={(r) => update({ part: cat.lcsc[r] === state.part ? null : cat.lcsc[r] })}
           favs={favs} onFav={toggleFav}
@@ -265,7 +285,11 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
       )}
       {dialog === 'columns' && (
         <ColumnsDialog
-          all={allCols} shown={shownIds} defaults={defaultCols}
+          choices={[
+            ...allCols.filter((c) => !c.computed).map((c) => ({ id: c.id, name: c.name, rare: c.rare, group: c.builtin ? 'General' : 'Parameters' })),
+            { id: DESC_COL, name: 'Description', group: 'General' },
+          ]}
+          shown={shownIds} defaults={defaultCols} computed={computed}
           onSave={(ids) => { setPrefs((p) => ({ ...p, cols: ids })); setDialog(null); }}
           onClose={() => setDialog(null)}
         />

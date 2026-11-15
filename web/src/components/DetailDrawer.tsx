@@ -56,7 +56,15 @@ export function DetailDrawer(props: {
         <button className="btn ghost icon" onClick={props.onClose} aria-label="Close details"><Icon.close /></button>
       </header>
       <div className="body">
-        {img && <img className="partimg" src={imageUrl(img)} alt="" loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
+        {img ? (
+          <a href={imageUrl(img, 'big')} target="_blank" rel="noreferrer" title="Open the full-size photo">
+            <img className="partimg" src={imageUrl(img, 'medium')} alt={`Photo of ${cat.mfr[row]}`} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          </a>
+        ) : (
+          <a className="partimg none" href={lcscUrl(lcsc)} target="_blank" rel="noreferrer" title="The catalogue data has no photo for this part; LCSC's product page usually does">
+            no photo here<br />see LCSC <Icon.ext />
+          </a>
+        )}
         <div className="links">
           <a className="btn sm primary" href={jlcUrl(lcsc)} target="_blank" rel="noreferrer">JLCPCB <Icon.ext /></a>
           <a className="btn sm" href={lcscUrl(lcsc)} target="_blank" rel="noreferrer">LCSC <Icon.ext /></a>

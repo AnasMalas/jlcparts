@@ -49,6 +49,26 @@ buy. We keep to the same footing:
 If you plan to use this data commercially, ask JLCPCB for access to their
 official API rather than relying on this project.
 
+## 1a. Part photos (`image-index/`)
+
+The site never stores or re-hosts part photos. It stores, per part, the *file
+name* of the photo LCSC shows for it, and the browser loads the picture from
+LCSC's image server, as the original jlcparts has always done.
+
+The upstream database has that file name for only about 1 % of parts.
+`tools/collect-images.mjs` can learn it for more by reading a part's public
+product page on lcsc.com and taking the image name from the page header. On the
+rules: LCSC's robots.txt allows product pages for all crawlers, and their terms
+of sale say nothing about automated access. On manners, which matter more: the
+tool reads one page at a time with a pause between requests (two seconds by
+default), stops reading each page as soon as it has the image name, never
+fetches a part twice, and ends the run if LCSC answers 403 or 429.
+
+Indexing the whole catalogue is several hundred thousand page reads. That is a
+decision for whoever runs the tool, not something the build does on its own: the
+daily build only uses what is already in `image-index/`. Do it by category, a
+few hundred parts at a time, and stop if LCSC objects.
+
 ## 2. Datasheet-derived data (`datasheet-data/`)
 
 Some parameters that matter for choosing a part exist only in the

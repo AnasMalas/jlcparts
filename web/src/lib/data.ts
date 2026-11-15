@@ -219,8 +219,10 @@ export function datasheetUrl(ds: string): string | null {
 }
 export const lcscUrl = (lcsc: number) => `https://www.lcsc.com/product-detail/C${lcsc}.html`;
 export const jlcUrl = (lcsc: number) => `https://jlcpcb.com/partdetail/C${lcsc}`;
-export const imageUrl = (img: string, size: 'small' | 'big' = 'big') =>
-  `https://assets.lcsc.com/images/lcsc/${size === 'small' ? '96x96' : '900x900'}/${img}`;
+const IMG_SIZES = { small: '96x96', medium: '224x224', big: '900x900' };
+/** LCSC serves each part photo in three sizes; the catalogue data stores only the file name. */
+export const imageUrl = (img: string, size: keyof typeof IMG_SIZES = 'big') =>
+  `https://assets.lcsc.com/images/lcsc/${IMG_SIZES[size]}/${img}`;
 
 /** Unit price at an order quantity, from the flat [qty, price, qty, price, ...] list. */
 export function priceAt(breaks: number[], qty: number): number {

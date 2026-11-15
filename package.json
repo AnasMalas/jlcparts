@@ -10,7 +10,8 @@
     "build": "npm --prefix web run build",
     "test": "npm --prefix web test",
     "extract": "node tools/extract-datasheet.mjs",
-    "import-records": "node tools/import-records.mjs"
+    "import-records": "node tools/import-records.mjs",
+    "collect-images": "node tools/collect-images.mjs"
   },
   "engines": {
     "node": ">=20"
