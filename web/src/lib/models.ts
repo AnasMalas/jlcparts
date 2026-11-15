@@ -5,7 +5,7 @@
 import type { Category, Column } from './data';
 import { priceAt } from './data';
 import type { DsMap, DsRecord } from './dsdata';
-import type { EvalCtx, Fn, Val } from './formula';
+import { parse, type EvalCtx, type Fn, type Node, type Val } from './formula';
 import { interp } from '@shared/recipes.js';
 
 export interface FnHelp {
@@ -20,13 +20,13 @@ export interface Models {
   help: FnHelp[];
 }
 
-export function buildModels(cat: Category, ds: DsMap): Models {
+export function buildModels(cat: Category, attrs: Column[], ds: DsMap): Models {
   const dsByRow: (DsRecord | undefined)[] = new Array(cat.n);
   for (const [lcsc, rec] of ds) {
     const r = cat.rowOf.get(lcsc);
     if (r !== undefined) dsByRow[r] = rec;
   }
-  const col = (id: string): Column | undefined => cat.attrs.find((a) => a.id === id);
+  const col = (id: string): Column | undefined => attrs.find((a) => a.id === id);
 
   const fns: Record<string, Fn> = {
     price: (ctx, a) => priceAt(cat.price[ctx.row], num(a[0], 1)),
@@ -87,8 +87,14 @@ export function buildModels(cat: Category, ds: DsMap): Models {
         if (vgs < pts[0][0]) { ctx.note = `below the datasheet curve (starts at ${pts[0][0]} V)`; return NaN; }
         return interp(pts, vgs, { extrapolate: 'hold' });
       }
-      const raw = rds?.pts?.[row];
-      if (!raw) { ctx.note = 'no Rds(on) in the catalogue'; return NaN; }
+      let raw = rds?.pts?.[row] || null;
+      if (!raw) {
+        // no catalogue rating: a datasheet record may still state the headline value
+        const sc = dsByRow[row]?.scalars;
+        const r = sc?.rds_on_typ ?? sc?.rds_on_max ?? (rds?.filled?.[row] ? rds.nv![row] : undefined);
+        if (r === undefined || Number.isNaN(r)) { ctx.note = 'no Rds(on) in the catalogue or datasheet data'; return NaN; }
+        raw = [[sc?.rds_on_vgs ?? null, r]];
+      }
       const drive = defaultDrive(row);
       // best (lowest) resistance per gate voltage; an unspecified voltage means "rated drive"
       const byV = new Map<number, number>();
@@ -127,9 +133,13 @@ export function buildModels(cat: Category, ds: DsMap): Models {
       return Math.pow((tj + 273.15) / 298.15, alpha(ctx.row));
     };
 
+    const vgsMax = col('gate-source-voltage-vgs-max');
     fns.rds_on = (ctx, a, named) => {
       const vgs = Math.abs(num(named.vgs ?? a[0], defaultDrive(ctx.row)));
       const tj = num(named.tj ?? a[1], 25);
+      // a number here would be worse than none: the gate cannot be driven that hard
+      const limit = vgsMax?.nv?.[ctx.row] ?? NaN;
+      if (vgs > limit) { ctx.note = `${vgs} V exceeds the gate rating (±${limit} V)`; return NaN; }
       const r = rds25(ctx, vgs);
       if (Number.isNaN(r)) return NaN;
       return r * tempFactor(ctx, tj);
@@ -152,7 +162,7 @@ export function buildModels(cat: Category, ds: DsMap): Models {
       return v;
     };
     help.unshift(
-      { sig: 'rds_on(vgs, tj)', text: 'On-resistance at a gate drive (V) and junction temperature (°C, default 25). Uses the digitised datasheet curves when a part has them; otherwise the catalogue rating at the nearest rated drive at or below vgs, scaled by a generic temperature model (marked ≈).' },
+      { sig: 'rds_on(vgs, tj)', text: 'On-resistance at a gate drive (V) and junction temperature (°C, default 25). Blank when vgs is above the gate rating. Uses the digitised datasheet curves when a part has them; otherwise the catalogue rating at the nearest rated drive at or below vgs, scaled by a generic temperature model (marked ≈).' },
       { sig: 'rth_jc()', text: 'Junction-to-case thermal resistance (°C/W). Datasheet value when available, otherwise estimated as (Tj max − 25) / Pd (marked ≈).' },
       { sig: 'rth_ja()', text: 'Junction-to-ambient thermal resistance (°C/W), datasheet-derived only.' },
       { sig: 'tj_max()', text: 'Maximum junction temperature (°C).' },
@@ -160,6 +170,45 @@ export function buildModels(cat: Category, ds: DsMap): Models {
     );
   }
   return { fns, help };
+}
+
+/** Which datasheet items each formula function draws on. */
+const FN_NEEDS: Record<string, { scalars?: string[]; curves?: string[] }> = {
+  rds_on: { curves: ['rds_on_vs_vgs', 'rds_on_norm_vs_tj'] },
+  rds_tempco: { curves: ['rds_on_norm_vs_tj'] },
+  rth_jc: { scalars: ['rth_jc', 'tj_max'] },
+  rth_ja: { scalars: ['rth_ja'] },
+  tj_max: { scalars: ['tj_max'] },
+};
+
+/**
+ * The datasheet items a set of formulas actually uses, so a reading job can
+ * ask for those and nothing else. Formulas that fail to parse are ignored.
+ */
+export function datasheetNeeds(exprs: string[]): { scalars: Set<string>; curves: Set<string> } {
+  const scalars = new Set<string>(), curves = new Set<string>();
+  const walk = (n: Node) => {
+    switch (n.k) {
+      case 'call': {
+        const name = n.name.toLowerCase();
+        const need = FN_NEEDS[name];
+        need?.scalars?.forEach((s) => scalars.add(s));
+        need?.curves?.forEach((c) => curves.add(c));
+        const first = n.args[0];
+        if (first?.k === 'str') { if (name === 'ds') scalars.add(first.v); if (name === 'curve') curves.add(first.v); }
+        n.args.forEach(walk);
+        Object.values(n.named).forEach(walk);
+        break;
+      }
+      case 'un': walk(n.a); break;
+      case 'bin': walk(n.a); walk(n.b); break;
+      case 'cond': walk(n.c); walk(n.a); walk(n.b); break;
+    }
+  };
+  for (const e of exprs) {
+    try { walk(parse(e)); } catch { /* shown as an error in the formula editor */ }
+  }
+  return { scalars, curves };
 }
 
 export interface Preset {

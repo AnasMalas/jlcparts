@@ -1,0 +1,14 @@
+{
+  "lcsc": "C35841",
+  "mfr": "AO7401",
+  "recipe": "mosfet",
+  "source": {
+    "url": "https://www.aosmd.com/pdfs/datasheet/AO7401.pdf",
+    "pages": "1",
+    "method": "read by Claude from the manufacturer's datasheet (graphs digitised by eye)",
+    "retrieved": "2026-11-15"
+  },
+  "params": {
+    "power-dissipation-pd": 0.35
+  }
+}

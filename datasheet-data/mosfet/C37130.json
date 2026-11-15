@@ -1,0 +1,93 @@
+{
+  "lcsc": "C37130",
+  "mfr": "AO3422",
+  "recipe": "mosfet",
+  "source": {
+    "url": "https://www.aosmd.com/pdfs/datasheet/AO3422.pdf",
+    "pages": "1, 2, 3",
+    "method": "read by Claude from the manufacturer's datasheet (graphs digitised by eye)",
+    "notes": "Rth(j-a) is the steady-state maximum (100 °C/W for t ≤ 10 s). The datasheet is inconsistent: the table gives 175 mΩ typ at 125 °C against 125 mΩ at 25 °C (a ratio of 1.40), but Figure 4 shows about 1.65 at 125 °C for the same gate drive. The curve below is the graph as drawn.",
+    "retrieved": "2026-11-15"
+  },
+  "scalars": {
+    "rth_ja": 150
+  },
+  "curves": {
+    "rds_on_vs_vgs": {
+      "cond": {
+        "Id": "2.3 A",
+        "Tj": "25 °C",
+        "figure": "Fig. 5"
+      },
+      "points": [
+        [
+          2.3,
+          0.2
+        ],
+        [
+          2.5,
+          0.157
+        ],
+        [
+          3,
+          0.14
+        ],
+        [
+          4,
+          0.128
+        ],
+        [
+          4.5,
+          0.125
+        ],
+        [
+          6,
+          0.12
+        ],
+        [
+          8,
+          0.117
+        ],
+        [
+          10,
+          0.115
+        ]
+      ]
+    },
+    "rds_on_norm_vs_tj": {
+      "cond": {
+        "Vgs": "4.5 V",
+        "figure": "Fig. 4"
+      },
+      "points": [
+        [
+          25,
+          1
+        ],
+        [
+          50,
+          1.13
+        ],
+        [
+          75,
+          1.3
+        ],
+        [
+          100,
+          1.46
+        ],
+        [
+          125,
+          1.66
+        ],
+        [
+          150,
+          1.84
+        ]
+      ]
+    }
+  },
+  "params": {
+    "power-dissipation-pd": 1.25
+  }
+}

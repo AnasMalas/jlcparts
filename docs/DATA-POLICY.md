@@ -103,6 +103,12 @@ Anthropic; nothing passes through or is stored by this site, and the result is
 kept in that browser until they choose to contribute it. Anthropic's handling of
 API inputs is described in its own terms and privacy policy.
 
+**Datasheet jobs.** The site can also write a "job file" for a list of parts
+that you give to an LLM of your own choosing, together with the datasheets. In
+that flow the site sends nothing anywhere: it produces a text file and later
+reads back the answer you paste in. What the LLM provider does with the files
+you give it is between you and that provider.
+
 ## 4. Privacy
 
 The site is static. It has no accounts, no analytics and no server of its own.

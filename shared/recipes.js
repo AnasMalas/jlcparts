@@ -96,6 +96,20 @@ export function validateRecord(rec) {
       if (i && p[0] <= pts[i - 1][0]) { problems.push(`curve "${k}" x values must increase`); break; }
     }
   }
-  if (!Object.keys(rec.scalars ?? {}).length && !Object.keys(rec.curves ?? {}).length) problems.push('record has no data');
+  // `params` fills gaps in the catalogue: { "<parameter id>": number | string | [lo, hi] }
+  if (rec.params !== undefined) {
+    if (!rec.params || typeof rec.params !== 'object' || Array.isArray(rec.params)) problems.push('params must be an object');
+    else {
+      for (const [k, v] of Object.entries(rec.params)) {
+        const ok =
+          (typeof v === 'number' && Number.isFinite(v)) ||
+          (typeof v === 'string' && v.trim() !== '') ||
+          (Array.isArray(v) && v.length === 2 && v.every((x) => typeof x === 'number' && Number.isFinite(x)) && v[0] <= v[1]);
+        if (!ok) problems.push(`param "${k}" must be a number, a non-empty string, or [low, high]`);
+      }
+    }
+  }
+  const any = (o) => o && typeof o === 'object' && Object.keys(o).length > 0;
+  if (!any(rec.scalars) && !any(rec.curves) && !any(rec.params)) problems.push('record has no data');
   return problems;
 }

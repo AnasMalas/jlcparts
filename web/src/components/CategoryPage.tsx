@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { datasheetUrl, loadCategory, type Category, type Column, type DataIndex, type IndexCat } from '../lib/data';
-import { builtinColumns, computeColumns, formulaSetup } from '../lib/columns';
+import { applyParams, builtinColumns, computeColumns, formulaSetup } from '../lib/columns';
 import { loadDsData, type DsMap } from '../lib/dsdata';
 import { isActive, run, sortRows, type FilterState } from '../lib/engine';
 import { cellText, describeFilter } from '../lib/format';
@@ -11,6 +11,8 @@ import { ResultsTable } from './ResultsTable';
 import { DetailDrawer } from './DetailDrawer';
 import { FormulaEditor } from './FormulaEditor';
 import { ColumnsDialog } from './ColumnsDialog';
+import { JobDialog } from './JobDialog';
+import { recipeFor } from '@shared/recipes.js';
 import { Icon, Loading, fmtInt } from './ui';
 
 function csvCell(s: string): string {
@@ -27,7 +29,7 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
   const [favList, setFavList] = useStored<number[]>('favs', []);
   const [state, setState] = useState<ViewState | null>(null);
   const [valuesOpen, setValuesOpen] = useState<Set<string>>(() => new Set());
-  const [dialog, setDialog] = useState<'formula' | 'columns' | null>(null);
+  const [dialog, setDialog] = useState<'formula' | 'columns' | 'job' | null>(null);
   const [showFilters, setShowFilters] = useState(true);
   const lastHash = useRef<string>('');
 
@@ -47,9 +49,11 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
   const qty = state?.qty ?? paramQty;
 
   const builtins = useMemo(() => (cat ? builtinColumns(cat, qty, ds) : []), [cat, qty, ds]);
-  const setup = useMemo(() => (cat ? formulaSetup(cat, [...builtins, ...cat.attrs], ds) : null), [cat, builtins, ds]);
+  // catalogue parameters, with blanks filled from datasheet records where those carry a value
+  const attrs = useMemo(() => (cat ? applyParams(cat, ds) : []), [cat, ds]);
+  const setup = useMemo(() => (cat ? formulaSetup(cat, [...builtins, ...attrs], ds, attrs) : null), [cat, builtins, attrs, ds]);
   const computed = useMemo(() => (cat && setup ? computeColumns(cat, sheet, setup).columns : []), [cat, sheet, setup]);
-  const allCols = useMemo<Column[]>(() => (cat ? [...builtins, ...computed, ...cat.attrs] : []), [cat, builtins, computed]);
+  const allCols = useMemo<Column[]>(() => (cat ? [...builtins, ...computed, ...attrs] : []), [cat, builtins, computed, attrs]);
 
   // URL -> state: on first load, and whenever the hash is changed from outside.
   const routeHash = hashFor(info.id, route.params);
@@ -90,9 +94,9 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
     const show = (c: Column) => !c.rare || prefs.moreFilters || isActive(filters[c.id]);
     const cls = builtins.filter((c) => c.id === '$class');
     const tail = builtins.filter((c) => c.id !== '$class');
-    return [...cls, ...computed, ...(cat?.attrs ?? []).filter(show), ...tail];
+    return [...cls, ...computed, ...attrs.filter(show), ...tail];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cat, builtins, computed, prefs.moreFilters, state?.filters]);
+  }, [attrs, builtins, computed, prefs.moreFilters, state?.filters]);
 
   const result = useMemo(() => {
     if (!cat || !state) return null;
@@ -105,7 +109,7 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
     return sortRows(cat, result.rows, allCols.find((c) => c.id === state.sort) ?? null, state.sort, state.desc);
   }, [cat, result, state?.sort, state?.desc, allCols]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const defaultCols = useMemo(() => [...builtins.filter((c) => c.id !== '$ds').map((c) => c.id), ...(cat?.attrs ?? []).filter((c) => !c.rare).map((c) => c.id)], [cat, builtins]);
+  const defaultCols = useMemo(() => [...builtins.filter((c) => c.id !== '$ds').map((c) => c.id), ...attrs.filter((c) => !c.rare).map((c) => c.id)], [attrs, builtins]);
   const shownIds = prefs.cols ?? defaultCols;
   const tableCols = useMemo(() => {
     const byId = new Map(allCols.map((c) => [c.id, c]));
@@ -119,7 +123,8 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
   if (!cat || !state || !result) return <Loading label={`Loading ${info.name} (${fmtInt(info.n)} parts, ${(info.bytes / 1e6).toFixed(1)} MB)…`} />;
 
   const active = allCols.filter((c) => isActive(state.filters[c.id]));
-  const nRare = cat.attrs.filter((c) => c.rare).length;
+  const nRare = attrs.filter((c) => c.rare).length;
+  const recipe = recipeFor(cat.id);
   const openRow = state.part !== null ? cat.rowOf.get(state.part) ?? null : null;
   const anyFilter = active.length > 0 || !!state.text || state.fav;
 
@@ -173,6 +178,11 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
         <button className={`btn${state.fav ? ' on' : ''}`} onClick={() => update({ fav: !state.fav })} title="Show only parts you starred"><Icon.star /> Favourites</button>
         <span className="spacer" />
         <button className={`btn${sheet.length ? ' on' : ''}`} onClick={() => setDialog('formula')} title="Add computed columns you can sort and filter by"><Icon.fx /> Formulas{sheet.length ? ` (${sheet.filter((d) => d.show).length})` : ''}</button>
+        {recipe && (
+          <button className="btn" onClick={() => setDialog('job')} title="Get datasheet curves for these parts with any LLM: write a job file, import the answer">
+            <Icon.doc /> Datasheet job
+          </button>
+        )}
         <button className="btn" onClick={() => setDialog('columns')}><Icon.columns /> Columns</button>
         <button className="btn" onClick={exportCsv} title={`Download the ${fmtInt(sorted.length)} matching parts as CSV`}><Icon.download /> CSV</button>
       </div>
@@ -241,6 +251,15 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
           cat={cat} setup={setup} sheet={sheet}
           previewRow={openRow ?? (sorted.length ? sorted[0] : 0)}
           onSave={(s) => { setSheet(s); setDialog(null); }}
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog === 'job' && recipe && (
+        <JobDialog
+          cat={cat} recipeKey={recipe.key} attrs={attrs} allCols={allCols}
+          filters={state.filters} text={state.text} only={state.fav ? favs : null}
+          sorted={sorted} sheet={sheet} ds={ds}
+          onChanged={() => setDsVersion((v) => v + 1)}
           onClose={() => setDialog(null)}
         />
       )}

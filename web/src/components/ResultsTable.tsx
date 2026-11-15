@@ -134,6 +134,9 @@ export function ResultsTable(props: {
                       </td>
                     );
                   }
+                  if (c.filled?.[r]) {
+                    return <td key={c.id} className={`${isNum(c) ? 'r ' : ''}filled`} title={`${text} — not in the catalogue; read from the datasheet`}>{text}<sup>d</sup></td>;
+                  }
                   return <td key={c.id} className={isNum(c) ? 'r' : ''} title={text.length > 18 ? text : undefined}>{text}</td>;
                 })}
                 <td title={cat.desc[r]} className="muted">{cat.desc[r]}</td>

@@ -1,0 +1,95 @@
+{
+  "lcsc": "C133233",
+  "mfr": "AO3415A",
+  "recipe": "mosfet",
+  "source": {
+    "url": "https://www.aosmd.com/pdfs/datasheet/AO3415A.pdf",
+    "pages": "1, 2, 3",
+    "method": "read by Claude from the manufacturer's datasheet (graphs digitised by eye)",
+    "notes": "P-channel, magnitudes given. Rth(j-a) is the steady-state maximum on 1 in² of 2 oz copper (80 °C/W for t ≤ 10 s). Gate rating is ±8 V.",
+    "retrieved": "2026-11-15"
+  },
+  "scalars": {
+    "rth_ja": 100
+  },
+  "curves": {
+    "rds_on_vs_vgs": {
+      "cond": {
+        "Id": "4 A",
+        "Tj": "25 °C",
+        "figure": "Fig. 5"
+      },
+      "points": [
+        [
+          1.5,
+          0.075
+        ],
+        [
+          1.8,
+          0.055
+        ],
+        [
+          2,
+          0.05
+        ],
+        [
+          2.5,
+          0.042
+        ],
+        [
+          3,
+          0.039
+        ],
+        [
+          4,
+          0.0355
+        ],
+        [
+          4.5,
+          0.034
+        ],
+        [
+          6,
+          0.0325
+        ],
+        [
+          8,
+          0.031
+        ]
+      ]
+    },
+    "rds_on_norm_vs_tj": {
+      "cond": {
+        "Vgs": "4.5 V",
+        "Id": "4 A",
+        "figure": "Fig. 4"
+      },
+      "points": [
+        [
+          25,
+          1
+        ],
+        [
+          50,
+          1.08
+        ],
+        [
+          75,
+          1.19
+        ],
+        [
+          100,
+          1.3
+        ],
+        [
+          125,
+          1.42
+        ],
+        [
+          150,
+          1.52
+        ]
+      ]
+    }
+  }
+}

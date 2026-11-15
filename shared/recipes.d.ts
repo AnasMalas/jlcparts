@@ -13,4 +13,6 @@ export interface DsRecordLike {
   source: { url: string; retrieved?: string; method?: string; pages?: string; notes?: string };
   scalars?: Record<string, number>;
   curves?: Record<string, { cond?: Record<string, number | string>; points: [number, number][]; note?: string }>;
+  /** catalogue gaps filled from the datasheet, keyed by parameter id */
+  params?: Record<string, number | string | [number, number]>;
 }

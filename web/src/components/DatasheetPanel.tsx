@@ -38,6 +38,11 @@ export function DatasheetPanel(props: { cat: Category; row: number; record: DsRe
               ))}
             </tbody></table>
           )}
+          {rec.params && Object.keys(rec.params).length > 0 && (
+            <p className="muted" style={{ fontSize: 12, margin: '6px 0 0' }}>
+              Also fills {Object.keys(rec.params).length} blank{Object.keys(rec.params).length === 1 ? '' : 's'} in the catalogue (marked <sup>d</sup> above).
+            </p>
+          )}
           {Object.entries(rec.curves ?? {}).map(([k, c]) => {
             const def = recipe.curves[k];
             if (!def) return null;

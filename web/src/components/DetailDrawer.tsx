@@ -102,7 +102,9 @@ export function DetailDrawer(props: {
 
         <h3>Parameters</h3>
         <table className="kv"><tbody>
-          {params.map(([c, t]) => (<tr key={c.id}><td>{c.name}</td><td>{t}</td></tr>))}
+          {params.map(([c, t]) => (
+            <tr key={c.id}><td>{c.name}</td><td>{t}{c.filled?.[row] ? <sup title="Not in the catalogue; read from the datasheet"> d</sup> : null}</td></tr>
+          ))}
           {cat.joints[row] > 0 && <tr><td>Solder joints</td><td>{cat.joints[row]}</td></tr>}
         </tbody></table>
 

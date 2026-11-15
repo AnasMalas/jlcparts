@@ -284,6 +284,11 @@ table.grid th.computed { color: var(--accent); }
 .badge.c1 { background: var(--warn-soft); color: var(--warn); }
 .badge.c2 { background: var(--muted-soft); color: var(--text-3); }
 .est { color: var(--warn); cursor: help; }
+table.grid td.filled { color: var(--good); }
+sup { font-size: 0.7em; color: var(--good); font-weight: 600; }
+.seg.big button { font-size: 13px; padding: 6px 14px; }
+.radio { display: flex; gap: 8px; align-items: baseline; padding: 3px 0; cursor: pointer; }
+.radio input[type='radio'], .radio input[type='checkbox'] { accent-color: var(--accent); flex: none; position: relative; top: 2px; }
 .na { color: var(--text-3); cursor: help; }
 .empty { padding: 40px 16px; text-align: center; color: var(--text-2); }
 .empty b { display: block; font-size: 15px; margin-bottom: 4px; color: var(--text); }

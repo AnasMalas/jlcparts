@@ -273,6 +273,65 @@ export function run(
 }
 
 // ---------------------------------------------------------------------------
+// Under-labelled parts
+// ---------------------------------------------------------------------------
+
+/** True when the part simply has no value for this parameter. */
+export function isMissing(col: Column, r: number): boolean {
+  switch (col.kind) {
+    case 'enum': return col.ev![r] < 0;
+    case 'multi': return !col.mv![r];
+    case 'num': return Number.isNaN(col.nv![r]);
+    default: return Number.isNaN(col.lo![r]) && Number.isNaN(col.hi![r]);
+  }
+}
+
+export interface Classified {
+  /** rows that pass every filter */
+  match: number[];
+  /** rows that fail only because the catalogue has a blank where a filter needs a value */
+  unknown: { row: number; missing: string[] }[];
+}
+
+/**
+ * Like run(), but also finds the parts that cannot be judged: they are not
+ * known to fail anything, the catalogue just does not say. Those are the
+ * parts worth looking up in a datasheet.
+ */
+export function classify(cat: Category, columns: Column[], filters: Filters, extra: Extra): Classified {
+  const tests: { test: Test; col: Column | null }[] = [];
+  for (const col of columns) {
+    const f = filters[col.id];
+    const t = f ? compile(col, f) : null;
+    if (t) tests.push({ test: t, col });
+  }
+  const tokens = (extra.text ?? '').toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.length) {
+    const hay = buildHaystack(cat);
+    tests.push({ test: (r) => tokens.every((t) => hay[r].includes(t)), col: null });
+  }
+  if (extra.only) {
+    const only = extra.only;
+    tests.push({ test: (r) => only.has(cat.lcsc[r]), col: null });
+  }
+  const match: number[] = [];
+  const unknown: Classified['unknown'] = [];
+  for (let r = 0; r < cat.n; r++) {
+    let missing: string[] | null = null;
+    let failed = false;
+    for (const { test, col } of tests) {
+      if (test(r)) continue;
+      if (col && isMissing(col, r)) (missing ??= []).push(col.id);
+      else { failed = true; break; }
+    }
+    if (failed) continue;
+    if (missing) unknown.push({ row: r, missing });
+    else match.push(r);
+  }
+  return { match, unknown };
+}
+
+// ---------------------------------------------------------------------------
 // Sorting
 // ---------------------------------------------------------------------------
 

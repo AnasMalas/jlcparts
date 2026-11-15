@@ -52,7 +52,7 @@ How to read a graph:
 - Convert everything to SI base units: mΩ to Ω, mV to V, nC to C, and so on. Temperatures stay in °C.
 - For P-channel parts, report voltages and currents as positive magnitudes.
 
-Tables: prefer the electrical-characteristics and thermal tables for scalar values, and record the test condition printed beside each value.
+Tables: prefer the electrical-characteristics and thermal tables for scalar values, and record the test condition printed beside each value. Use the tables to check your reading of a graph's axes: a typical value stated at the same condition should land on your curve. If graph and table differ by more than about 10 %, the datasheet itself is inconsistent; report the graph as drawn and say so in the notes.
 
 If the PDF is for a different part than the one named, set datasheet_matches_part to false and return empty lists.`;
 

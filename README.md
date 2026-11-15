@@ -93,14 +93,37 @@ asked for, and a generic temperature model chosen by voltage class and
 technology. Results that rest on the generic model are marked `≈`. Treat those
 as a way to build a shortlist, then read the datasheet.
 
+## Datasheet jobs: real curves for a whole shortlist
+
+Only a few parts ship with digitised datasheet curves, and the catalogue has
+blanks. Instead of reading datasheets one at a time, press **Datasheet job** in
+a category:
+
+- The site writes a compact job file for your shortlist: the parts, your
+  formulas (so it asks only for what they use), your filter requirements (so
+  parts that turn out not to fit are discarded early), and the exact answer
+  format.
+- You hand that file to any LLM along with the datasheets, or to one that can
+  browse for them.
+- You import its answer. Each record is validated; your formulas then use the
+  real curves, and blanks in the catalogue are filled (marked <sup>d</sup>).
+
+You can include "under-labelled" parts: ones that are not known to fail a
+filter, the catalogue just has no value there. The job tells the model which
+value to look up first for each of those.
+
+The site sends nothing anywhere in this flow and needs no API key. Imported
+records live in your browser until you contribute them (one download, one
+command, one pull request), after which every visitor has them.
+
 ## Datasheet data
 
 Values that only exist in datasheets (curves, thermal resistance) live in
 [`datasheet-data/`](datasheet-data/README.md) as small JSON files with a link
 to the source, so each part only has to be read once for everybody. Only a
-handful of parts have records so far. You can add one in the browser (type it
-in, or let Claude read the PDF with your own Anthropic API key) or from the
-command line, then contribute it with a pull request.
+handful of parts have records so far. Besides datasheet jobs, you can add a
+single part in the browser (type it in, or let Claude read the PDF with your
+own Anthropic API key) or from the command line.
 
 What may and may not be stored, and the reasoning, is in
 [docs/DATA-POLICY.md](docs/DATA-POLICY.md).
@@ -125,7 +148,8 @@ datasheet-data/*.json ──────▶ normalise parameters    c/<category>
   the browser on typed arrays; a 64,000-part category refilters in a few
   milliseconds.
 - `tools/extract-datasheet.mjs` — reads a datasheet PDF with Claude and writes
-  a `datasheet-data` record.
+  a `datasheet-data` record. `tools/import-records.mjs` turns a bundle of
+  records (a job answer, or a download from the site) into files.
 
 ## Running it yourself
 

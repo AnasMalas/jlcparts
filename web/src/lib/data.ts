@@ -59,6 +59,8 @@ export interface Column {
   est?: Uint8Array;
   /** computed columns: per-row note (why there is no value) */
   note?: Record<number, string>;
+  /** 1 where the value was filled in from a datasheet because the catalogue had a blank */
+  filled?: Uint8Array;
   /** short explanation shown in the UI */
   help?: string;
 }

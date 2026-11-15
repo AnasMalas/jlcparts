@@ -19,6 +19,7 @@ export const Icon = {
   close: () => (<svg viewBox="0 0 24 24" {...P}><path d="M6 6l12 12M18 6 6 18" /></svg>),
   plus: () => (<svg viewBox="0 0 24 24" {...P}><path d="M12 5v14M5 12h14" /></svg>),
   trash: () => (<svg viewBox="0 0 24 24" {...P}><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>),
+  doc: () => (<svg viewBox="0 0 24 24" {...P}><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></svg>),
   filter: () => (<svg viewBox="0 0 24 24" {...P}><path d="M3 5h18l-7 8v6l-4-2v-4L3 5Z" /></svg>),
 };
 
