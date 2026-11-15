@@ -36,7 +36,7 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
     loadCategory(info.id).then((c) => { if (live) setCat(c); }, (e) => { if (live) setError(String(e.message ?? e)); });
     return () => { live = false; };
   }, [info.id]);
-  const hasShared = !!(index as DataIndex & { ds?: Record<string, number> }).ds?.[info.id];
+  const hasShared = !!index.ds?.[info.id];
   useEffect(() => {
     let live = true;
     loadDsData(info.id, hasShared).then((m) => { if (live) setDs(m); });
@@ -46,7 +46,7 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
   const paramQty = Math.max(1, parseInt(route.params.get('qty') ?? '1', 10) || 1);
   const qty = state?.qty ?? paramQty;
 
-  const builtins = useMemo(() => (cat ? builtinColumns(cat, qty) : []), [cat, qty]);
+  const builtins = useMemo(() => (cat ? builtinColumns(cat, qty, ds) : []), [cat, qty, ds]);
   const setup = useMemo(() => (cat ? formulaSetup(cat, [...builtins, ...cat.attrs], ds) : null), [cat, builtins, ds]);
   const computed = useMemo(() => (cat && setup ? computeColumns(cat, sheet, setup).columns : []), [cat, sheet, setup]);
   const allCols = useMemo<Column[]>(() => (cat ? [...builtins, ...computed, ...cat.attrs] : []), [cat, builtins, computed]);
@@ -105,7 +105,7 @@ export function CategoryPage({ info, route, index }: { info: IndexCat & { group:
     return sortRows(cat, result.rows, allCols.find((c) => c.id === state.sort) ?? null, state.sort, state.desc);
   }, [cat, result, state?.sort, state?.desc, allCols]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const defaultCols = useMemo(() => [...builtins.map((c) => c.id), ...(cat?.attrs ?? []).filter((c) => !c.rare).map((c) => c.id)], [cat, builtins]);
+  const defaultCols = useMemo(() => [...builtins.filter((c) => c.id !== '$ds').map((c) => c.id), ...(cat?.attrs ?? []).filter((c) => !c.rare).map((c) => c.id)], [cat, builtins]);
   const shownIds = prefs.cols ?? defaultCols;
   const tableCols = useMemo(() => {
     const byId = new Map(allCols.map((c) => [c.id, c]));

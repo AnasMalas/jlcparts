@@ -73,8 +73,12 @@ export const UNITS = {
   currency: { sym: '$', mode: 'money' },
 };
 
-/** Compact number: up to `sig` significant digits, no trailing zeros, no exponent for sane magnitudes. */
-export function num(x, sig = 4) {
+/**
+ * Compact number: up to `sig` significant digits, no trailing zeros, no exponent for sane magnitudes.
+ * Seven digits keeps catalogue values exact (32.768 kHz, 11.0592 MHz) while still hiding
+ * floating-point noise (0.35000000000000003 -> 0.35).
+ */
+export function num(x, sig = 7) {
   if (x === 0) return '0';
   if (!Number.isFinite(x)) return String(x);
   const a = Math.abs(x);
@@ -96,7 +100,7 @@ function siFormat(x, sym, sig) {
 }
 
 /** Format a value stored in base units. `unit` is a key of UNITS (or undefined). */
-export function formatValue(x, unit, sig = 4) {
+export function formatValue(x, unit, sig = 7) {
   if (x === null || x === undefined || Number.isNaN(x)) return '';
   const u = UNITS[unit];
   if (!u) return num(x, sig);

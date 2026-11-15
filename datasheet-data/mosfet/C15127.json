@@ -1,0 +1,98 @@
+{
+  "lcsc": "C15127",
+  "mfr": "AO3401A",
+  "recipe": "mosfet",
+  "source": {
+    "url": "https://www.aosmd.com/pdfs/datasheet/AO3401A.pdf",
+    "retrieved": "2026-11-15",
+    "method": "read by Claude from the manufacturer's datasheet (graphs digitised by eye)",
+    "pages": "1, 2, 3",
+    "notes": "P-channel: voltages and currents are given as positive magnitudes. Rth(j-a) is the steady-state maximum on 1 in² of 2 oz copper; junction-to-lead (80 °C/W max) is given instead of junction-to-case."
+  },
+  "scalars": {
+    "rth_ja": 125,
+    "tj_max": 150,
+    "rds_on_typ": 0.041,
+    "rds_on_max": 0.05,
+    "rds_on_vgs": 10,
+    "qg_typ": 1.4e-08,
+    "qgd_typ": 2.5e-09,
+    "vgs_th_typ": 0.9
+  },
+  "curves": {
+    "rds_on_vs_vgs": {
+      "cond": {
+        "Id": "4 A",
+        "Tj": "25 °C",
+        "figure": "Fig. 5"
+      },
+      "points": [
+        [
+          2.2,
+          0.075
+        ],
+        [
+          2.5,
+          0.06
+        ],
+        [
+          3,
+          0.054
+        ],
+        [
+          4,
+          0.048
+        ],
+        [
+          4.5,
+          0.047
+        ],
+        [
+          6,
+          0.044
+        ],
+        [
+          8,
+          0.042
+        ],
+        [
+          10,
+          0.041
+        ]
+      ]
+    },
+    "rds_on_norm_vs_tj": {
+      "cond": {
+        "Vgs": "10 V",
+        "Id": "4 A",
+        "figure": "Fig. 4"
+      },
+      "points": [
+        [
+          25,
+          1.0
+        ],
+        [
+          50,
+          1.12
+        ],
+        [
+          75,
+          1.25
+        ],
+        [
+          100,
+          1.39
+        ],
+        [
+          125,
+          1.52
+        ],
+        [
+          150,
+          1.68
+        ]
+      ]
+    }
+  }
+}

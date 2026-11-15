@@ -33,7 +33,8 @@ const nan2null = (x: number) => (Number.isNaN(x) ? null : x);
 export function formatNum(col: Column, x: number): string {
   if (col.id === '$stock') return intFmt.format(x);
   if (col.unit === 'count') return intFmt.format(x);
-  const s = formatValue(x, col.unit);
+  // formula results are computed, so four significant digits is honest; catalogue values are shown exactly
+  const s = formatValue(x, col.unit, col.computed ? 4 : 7);
   return col.pm ? `±${s}` : s;
 }
 

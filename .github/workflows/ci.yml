@@ -1,0 +1,27 @@
+name: Checks
+
+# Runs on pull requests: type-check, unit tests, and validation of every
+# record in datasheet-data/ (the tests load them all).
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+      - run: |
+          npm ci
+          npm --prefix web ci
+      - run: npm --prefix web run typecheck
+      - run: npm test

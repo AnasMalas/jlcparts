@@ -1,0 +1,98 @@
+{
+  "lcsc": "C20917",
+  "mfr": "AO3400A",
+  "recipe": "mosfet",
+  "source": {
+    "url": "https://www.aosmd.com/pdfs/datasheet/AO3400A.pdf",
+    "retrieved": "2026-11-15",
+    "method": "read by Claude from the manufacturer's datasheet (graphs digitised by eye)",
+    "pages": "1, 2, 3",
+    "notes": "Rth(j-a) is the steady-state maximum on 1 in² of 2 oz copper. The datasheet gives junction-to-lead (80 °C/W max) rather than junction-to-case, so rth_jc is left out. Qg is specified at Vgs = 4.5 V."
+  },
+  "scalars": {
+    "rth_ja": 125,
+    "tj_max": 150,
+    "rds_on_typ": 0.018,
+    "rds_on_max": 0.0265,
+    "rds_on_vgs": 10,
+    "qg_typ": 6e-09,
+    "qgd_typ": 1.8e-09,
+    "vgs_th_typ": 1.05
+  },
+  "curves": {
+    "rds_on_vs_vgs": {
+      "cond": {
+        "Id": "5.7 A",
+        "Tj": "25 °C",
+        "figure": "Fig. 5"
+      },
+      "points": [
+        [
+          2.2,
+          0.03
+        ],
+        [
+          2.5,
+          0.024
+        ],
+        [
+          3,
+          0.0215
+        ],
+        [
+          4,
+          0.0198
+        ],
+        [
+          4.5,
+          0.019
+        ],
+        [
+          6,
+          0.0187
+        ],
+        [
+          8,
+          0.0182
+        ],
+        [
+          10,
+          0.018
+        ]
+      ]
+    },
+    "rds_on_norm_vs_tj": {
+      "cond": {
+        "Vgs": "10 V",
+        "Id": "5.7 A",
+        "figure": "Fig. 4"
+      },
+      "points": [
+        [
+          25,
+          1.0
+        ],
+        [
+          50,
+          1.13
+        ],
+        [
+          75,
+          1.26
+        ],
+        [
+          100,
+          1.4
+        ],
+        [
+          125,
+          1.55
+        ],
+        [
+          150,
+          1.7
+        ]
+      ]
+    }
+  }
+}

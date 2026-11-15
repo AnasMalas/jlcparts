@@ -1,0 +1,99 @@
+{
+  "lcsc": "C99124",
+  "mfr": "AOD4184A",
+  "recipe": "mosfet",
+  "source": {
+    "url": "https://www.aosmd.com/pdfs/datasheet/AOD4184A.pdf",
+    "retrieved": "2026-11-15",
+    "method": "read by Claude from the manufacturer's datasheet (graphs digitised by eye)",
+    "pages": "1, 2, 3",
+    "notes": "Rth(j-a) is the steady-state maximum on 1 in² of 2 oz copper."
+  },
+  "scalars": {
+    "rth_jc": 3,
+    "rth_ja": 55,
+    "tj_max": 175,
+    "rds_on_typ": 0.0058,
+    "rds_on_max": 0.007,
+    "rds_on_vgs": 10,
+    "qg_typ": 2.7e-08,
+    "qgd_typ": 6e-09,
+    "vgs_th_typ": 2.1
+  },
+  "curves": {
+    "rds_on_vs_vgs": {
+      "cond": {
+        "Id": "20 A",
+        "Tj": "25 °C",
+        "figure": "Fig. 5"
+      },
+      "points": [
+        [
+          3.7,
+          0.015
+        ],
+        [
+          4,
+          0.009
+        ],
+        [
+          4.5,
+          0.0076
+        ],
+        [
+          5,
+          0.007
+        ],
+        [
+          6,
+          0.0064
+        ],
+        [
+          8,
+          0.006
+        ],
+        [
+          10,
+          0.0058
+        ]
+      ]
+    },
+    "rds_on_norm_vs_tj": {
+      "cond": {
+        "Vgs": "10 V",
+        "Id": "20 A",
+        "figure": "Fig. 4"
+      },
+      "points": [
+        [
+          25,
+          1.0
+        ],
+        [
+          50,
+          1.12
+        ],
+        [
+          75,
+          1.27
+        ],
+        [
+          100,
+          1.44
+        ],
+        [
+          125,
+          1.65
+        ],
+        [
+          150,
+          1.83
+        ],
+        [
+          175,
+          2.04
+        ]
+      ]
+    }
+  }
+}

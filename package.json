@@ -8,7 +8,14 @@
     "data:offline": "node pipeline/build.mjs --offline",
     "dev": "npm --prefix web run dev",
     "build": "npm --prefix web run build",
-    "test": "node --test shared/ pipeline/ web/src/lib/"
+    "test": "npm --prefix web test",
+    "extract": "node tools/extract-datasheet.mjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "zod": "^4.6.7"
+  }
 }

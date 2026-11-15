@@ -1,0 +1,62 @@
+name: Build and deploy
+
+# Rebuilds the parts database from the upstream daily snapshot and publishes
+# the site to GitHub Pages. Runs on every push to main, once a day, and on demand.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '40 5 * * *' # daily, a few hours after the upstream database is refreshed
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix web ci
+      - name: Restore upstream download cache
+        uses: actions/cache@v6
+        with:
+          path: .cache/upstream
+          key: upstream-${{ github.run_id }}
+          restore-keys: upstream-
+      - name: Build the parts database
+        run: npm run data
+      - name: Test
+        run: npm test
+      - name: Build the site
+        run: npm run build
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

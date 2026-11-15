@@ -1,0 +1,110 @@
+{
+  "lcsc": "C529277",
+  "mfr": "CSD17575Q3",
+  "recipe": "mosfet",
+  "source": {
+    "url": "https://www.ti.com/lit/ds/symlink/csd17575q3.pdf",
+    "retrieved": "2026-11-15",
+    "method": "read by Claude from the manufacturer's datasheet (graphs digitised by eye)",
+    "pages": "3, 5, 6",
+    "notes": "Rth(j-a) is the maximum on 1 in² of 2 oz copper (160 °C/W on a minimum pad). Qg is specified at Vgs = 4.5 V."
+  },
+  "scalars": {
+    "rth_jc": 1.5,
+    "rth_ja": 55,
+    "rds_on_typ": 0.0019,
+    "rds_on_max": 0.0023,
+    "rds_on_vgs": 10,
+    "qg_typ": 2.3e-08,
+    "qgd_typ": 5.4e-09,
+    "vgs_th_typ": 1.4
+  },
+  "curves": {
+    "rds_on_vs_vgs": {
+      "cond": {
+        "Id": "25 A",
+        "Tc": "25 °C",
+        "figure": "Fig. 7"
+      },
+      "points": [
+        [
+          3.2,
+          0.0045
+        ],
+        [
+          3.5,
+          0.0033
+        ],
+        [
+          4,
+          0.0028
+        ],
+        [
+          4.5,
+          0.0026
+        ],
+        [
+          6,
+          0.0022
+        ],
+        [
+          8,
+          0.00205
+        ],
+        [
+          10,
+          0.0019
+        ],
+        [
+          20,
+          0.00187
+        ]
+      ]
+    },
+    "rds_on_norm_vs_tj": {
+      "cond": {
+        "Vgs": "10 V",
+        "Id": "25 A",
+        "figure": "Fig. 8"
+      },
+      "points": [
+        [
+          -55,
+          0.7
+        ],
+        [
+          -25,
+          0.8
+        ],
+        [
+          0,
+          0.9
+        ],
+        [
+          25,
+          1.0
+        ],
+        [
+          50,
+          1.11
+        ],
+        [
+          75,
+          1.22
+        ],
+        [
+          100,
+          1.38
+        ],
+        [
+          125,
+          1.55
+        ],
+        [
+          150,
+          1.72
+        ]
+      ]
+    }
+  }
+}

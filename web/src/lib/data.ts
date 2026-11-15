@@ -20,6 +20,8 @@ export interface DataIndex {
   source: { url: string; created: string; upstreamCategories: number };
   total: number;
   searchBytes: number;
+  /** category id -> number of parts with shared datasheet-derived data */
+  ds?: Record<string, number>;
   groups: IndexGroup[];
 }
 

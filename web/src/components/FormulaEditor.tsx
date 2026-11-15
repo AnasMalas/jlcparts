@@ -117,7 +117,7 @@ export function FormulaEditor(props: {
                     <div className="err">{err.message}</div>
                   ) : (
                     <div className="ok">
-                      {Number.isNaN(v) ? `n/a${preview.notes[i] ? ` — ${preview.notes[i]}` : ''}` : `${preview.est[i] ? '≈ ' : '= '}${formatValue(v, d.unit || undefined)}`}
+                      {Number.isNaN(v) ? `n/a${preview.notes[i] ? ` — ${preview.notes[i]}` : ''}` : `${preview.est[i] ? '≈ ' : '= '}${formatValue(v, d.unit || undefined, 4)}`}
                     </div>
                   )}
                 </td>

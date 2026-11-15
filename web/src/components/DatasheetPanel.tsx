@@ -41,7 +41,7 @@ export function DatasheetPanel(props: { cat: Category; row: number; record: DsRe
           {Object.entries(rec.curves ?? {}).map(([k, c]) => {
             const def = recipe.curves[k];
             if (!def) return null;
-            const cond = Object.entries(c.cond ?? {}).map(([a, b]) => `${a} = ${b}`).join(', ');
+            const cond = Object.entries(c.cond ?? {}).filter(([a]) => a !== 'figure').map(([a, b]) => (a === 'note' ? String(b) : `${a} = ${b}`)).join(', ');
             return (
               <div key={k} style={{ marginTop: 12 }}>
                 <div style={{ fontWeight: 600, fontSize: 12.5 }}>{def.label}</div>
@@ -75,7 +75,7 @@ export function DatasheetPanel(props: { cat: Category; row: number; record: DsRe
       </div>
       {extract && (
         <ExtractDialog
-          lcsc={lcsc} mfr={props.cat.mfr[props.row]} recipeKey={recipe.key} datasheet={props.datasheet} existing={rec}
+          lcsc={lcsc} mfr={props.cat.mfr[props.row]} description={props.cat.desc[props.row]} recipeKey={recipe.key} datasheet={props.datasheet} existing={rec}
           onClose={() => setExtract(false)}
           onSaved={() => { setExtract(false); props.onChanged(); }}
         />

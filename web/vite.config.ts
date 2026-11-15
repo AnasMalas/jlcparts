@@ -7,7 +7,7 @@ import path from 'node:path';
 export default defineConfig({
   base: './',
   plugins: [react()],
-  resolve: { alias: { '@shared': path.resolve(__dirname, '../shared') } },
+  resolve: { alias: { '@shared': path.resolve(import.meta.dirname, '../shared') } },
   server: { fs: { allow: ['..'] } },
   build: { target: 'es2022', sourcemap: true },
 });

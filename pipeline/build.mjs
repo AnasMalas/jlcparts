@@ -18,6 +18,8 @@ import {
   GLOBAL_ALIASES, SCOPED_ALIASES, KEY_PARAMS, ENRICHERS, POINT_PARAMS, isNullish, translate,
 } from './attributes.mjs';
 import { formatValue, formatRange, UNITS } from '../shared/units.js';
+import { RECIPES, validateRecord } from '../shared/recipes.js';
+import { sanityCheck } from '../shared/extract.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -542,6 +544,33 @@ async function main() {
       return (ia < 0 ? 1e9 : ia) - (ib < 0 ? 1e9 : ib) || b.n - a.n;
     });
   }
+  // ---- 6b. datasheet-derived data (datasheet-data/<recipe>/<LCSC>.json) -----
+  const dsCounts = {};
+  if (!ONLY) {
+    await mkdir(path.join(OUT, 'ds'), { recursive: true });
+    for (const [recipeKey, recipe] of Object.entries(RECIPES)) {
+      const dir = path.join(ROOT, 'datasheet-data', recipeKey);
+      let names = [];
+      try { names = (await readdir(dir)).filter((f) => f.endsWith('.json')); } catch { /* no records for this recipe yet */ }
+      const parts = {};
+      for (const name of names) {
+        let rec;
+        try { rec = JSON.parse(await readFile(path.join(dir, name), 'utf8')); } catch (e) { console.log(`SKIPPED datasheet-data/${recipeKey}/${name}: not valid JSON (${e.message})`); continue; }
+        const problems = [...validateRecord(rec), ...sanityCheck(rec)];
+        if (rec.lcsc && `${rec.lcsc}.json` !== name) problems.push('file name does not match the lcsc field');
+        if (problems.length) { console.log(`SKIPPED datasheet-data/${recipeKey}/${name}: ${problems.join('; ')}`); continue; }
+        parts[rec.lcsc] = rec;
+      }
+      const n = Object.keys(parts).length;
+      if (!n) continue;
+      for (const catId of recipe.categories) {
+        await writeFile(path.join(OUT, 'ds', `${catId}.json`), JSON.stringify({ v: 1, recipe: recipeKey, parts }));
+        dsCounts[catId] = n;
+      }
+      console.log(`Datasheet data: ${n} ${recipeKey} record(s)`);
+    }
+  }
+
   const searchGz = gzipSync(Buffer.from(JSON.stringify(search)), { level: 9 });
   await writeFile(path.join(OUT, 'search.json.gz'), searchGz);
   const index = {
@@ -550,6 +579,7 @@ async function main() {
     source: { url: SOURCE, created: manifest.created, upstreamCategories: manifest.categories.length },
     total,
     searchBytes: searchGz.length,
+    ds: dsCounts,
     groups,
     units: Object.keys(UNITS),
   };

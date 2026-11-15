@@ -6,8 +6,9 @@ import { CLASS_NAMES, priceAt } from './data';
 import type { DsMap } from './dsdata';
 import { compileSheet, type CompiledSheet, type Definition, type Env, type EvalCtx, type Val } from './formula';
 import { buildModels, type Models } from './models';
+import { recipeFor } from '@shared/recipes.js';
 
-export function builtinColumns(cat: Category, qty: number): Column[] {
+export function builtinColumns(cat: Category, qty: number, ds?: DsMap): Column[] {
   const cls: Column = {
     id: '$class', name: 'Library class', kind: 'enum', n: cat.n, builtin: true,
     dict: CLASS_NAMES, ev: Int32Array.from(cat.cls),
@@ -20,14 +21,25 @@ export function builtinColumns(cat: Category, qty: number): Column[] {
     id: '$price', name: `Unit price @ ${qty}`, kind: 'num', n: cat.n, unit: 'currency', builtin: true, nv: price,
     help: 'Unit price in USD at the order quantity set in the toolbar.',
   };
-  return [cls, stock, priceCol];
+  const cols = [cls, stock, priceCol];
+  if (recipeFor(cat.id)) {
+    const ev = new Int32Array(cat.n).fill(1);
+    if (ds) for (const lcsc of ds.keys()) { const r = cat.rowOf.get(lcsc); if (r !== undefined) ev[r] = 0; }
+    cols.push({
+      id: '$ds', name: 'Datasheet data', kind: 'enum', n: cat.n, builtin: true,
+      dict: ['Read from datasheet', 'Catalogue only'], ev,
+      help: 'Parts whose datasheet graphs have been digitised give exact formula results; the rest use a generic model (≈).',
+    });
+  }
+  return cols;
 }
 
 /** A short formula name for a parameter: "Drain-Source Voltage (Vdss)" -> Vdss, "Rds(on)" -> Rds_on. */
 export function aliasOf(name: string): string {
-  const paren = /\(([A-Za-z][A-Za-z0-9()@ ]*)\)\s*$/.exec(name);
+  // "Long Name (Sym)" -> Sym. The space matters: "Rds(on)" is itself the symbol.
+  const paren = /\s\(([A-Za-z][A-Za-z0-9()]*)\)\s*$/.exec(name);
   let base = name;
-  if (paren && paren.index > 0 && paren[1].length <= 12 && !/\s/.test(paren[1].trim())) base = paren[1];
+  if (paren && paren[1].length <= 12) base = paren[1];
   let a = base.replace(/[()]/g, '_').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '').replace(/_+/g, '_');
   if (!a) a = 'param';
   if (/^[0-9]/.test(a)) a = `p_${a}`;
